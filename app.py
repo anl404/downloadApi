@@ -145,6 +145,24 @@ class YouTubeInfoExtractor:
                 oembed_data = response.json()
                 
                 # Temel bilgileri döndür
+                best_format = {
+                    'format_id': 'best',
+                    'ext': 'mp4',
+                    'resolution': '720p',
+                    'height': 720,
+                    'width': 1280,
+                    'filesize': None,
+                    'filesize_mb': None,
+                    'url': f"https://www.youtube.com/watch?v={video_id}",
+                    'format_note': 'Best Quality (Direct Link)',
+                    'acodec': 'mp4a',
+                    'vcodec': 'avc1',
+                    'abr': 128,
+                    'vbr': None,
+                    'fps': 30,
+                    'tbr': None,
+                }
+                
                 return {
                     'id': video_id,
                     'title': oembed_data.get('title', 'Unknown'),
@@ -155,25 +173,7 @@ class YouTubeInfoExtractor:
                     'view_count': 0,
                     'like_count': 0,
                     'thumbnail': oembed_data.get('thumbnail_url', ''),
-                    'formats': [
-                        {
-                            'format_id': 'best',
-                            'ext': 'mp4',
-                            'resolution': '720p',
-                            'height': 720,
-                            'width': 1280,
-                            'filesize': None,
-                            'filesize_mb': None,
-                            'url': f"https://www.youtube.com/watch?v={video_id}",
-                            'format_note': 'Best Quality (Direct Link)',
-                            'acodec': 'mp4a',
-                            'vcodec': 'avc1',
-                            'abr': 128,
-                            'vbr': None,
-                            'fps': 30,
-                            'tbr': None,
-                        }
-                    ]
+                    'formats': [best_format]
                 }
             else:
                 print(f"OEmbed API error: {response.status_code}")
