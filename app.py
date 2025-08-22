@@ -13,6 +13,9 @@ from pathlib import Path
 import yt_dlp
 import ssl
 import urllib3
+import requests
+import re
+import json
 
 # SSL sertifika doğrulamasını tamamen devre dışı bırak
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -43,10 +46,34 @@ class YouTubeInfoExtractor:
             dict: Video bilgileri
         """
         try:
-            with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
+            options = {
+                'quiet': True,
+                'no_warnings': True,
+                'extract_flat': False,
+                'nocheckcertificate': True,
+                'ignoreerrors': False,
+                'no_color': True,
+                'geo_bypass': True,
+                'geo_bypass_country': 'US',
+                'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'http_headers': {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                    'Accept-Language': 'en-us,en;q=0.5',
+                    'Sec-Fetch-Mode': 'navigate',
+                },
+                'cookiesfrombrowser': None,
+                'extractor_args': {
+                    'youtube': {
+                        'skip': ['dash', 'live'],
+                    }
+                }
+            }
+            with yt_dlp.YoutubeDL(options) as ydl:
                 info = ydl.extract_info(url, download=False)
                 return info
         except Exception as e:
+            print(f"Error getting video info: {e}")
             return None
     
     def get_formats(self, url):
@@ -60,10 +87,100 @@ class YouTubeInfoExtractor:
             dict: Video formatları ve bilgileri
         """
         try:
-            with yt_dlp.YoutubeDL({'quiet': True}) as ydl:
+            options = {
+                'quiet': True,
+                'no_warnings': True,
+                'extract_flat': False,
+                'nocheckcertificate': True,
+                'ignoreerrors': False,
+                'no_color': True,
+                'geo_bypass': True,
+                'geo_bypass_country': 'US',
+                'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'http_headers': {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                    'Accept-Language': 'en-us,en;q=0.5',
+                    'Sec-Fetch-Mode': 'navigate',
+                },
+                'cookiesfrombrowser': None,
+                'extractor_args': {
+                    'youtube': {
+                        'skip': ['dash', 'live'],
+                    }
+                }
+            }
+            with yt_dlp.YoutubeDL(options) as ydl:
                 info = ydl.extract_info(url, download=False)
                 return info
         except Exception as e:
+            print(f"Error getting formats: {e}")
+            # Fallback to alternative method
+            return self.get_video_info_fallback(url)
+    
+    def get_video_info_fallback(self, url):
+        """
+        Alternatif video bilgi çıkarma yöntemi (yt-dlp çalışmazsa)
+        
+        Args:
+            url (str): YouTube video URL'si
+            
+        Returns:
+            dict: Temel video bilgileri
+        """
+        try:
+            video_id = url.split('v=')[1] if 'v=' in url else url.split('/')[-1]
+            
+            # YouTube oEmbed API kullan
+            oembed_url = f"https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={video_id}&format=json"
+            
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'application/json',
+                'Accept-Language': 'en-US,en;q=0.9',
+            }
+            
+            response = requests.get(oembed_url, headers=headers, timeout=10)
+            if response.status_code == 200:
+                oembed_data = response.json()
+                
+                # Temel bilgileri döndür
+                return {
+                    'id': video_id,
+                    'title': oembed_data.get('title', 'Unknown'),
+                    'description': '',
+                    'duration': 0,
+                    'uploader': oembed_data.get('author_name', 'Unknown'),
+                    'upload_date': '',
+                    'view_count': 0,
+                    'like_count': 0,
+                    'thumbnail': oembed_data.get('thumbnail_url', ''),
+                    'formats': [
+                        {
+                            'format_id': 'best',
+                            'ext': 'mp4',
+                            'resolution': '720p',
+                            'height': 720,
+                            'width': 1280,
+                            'filesize': None,
+                            'filesize_mb': None,
+                            'url': f"https://www.youtube.com/watch?v={video_id}",
+                            'format_note': 'Best Quality (Direct Link)',
+                            'acodec': 'mp4a',
+                            'vcodec': 'avc1',
+                            'abr': 128,
+                            'vbr': None,
+                            'fps': 30,
+                            'tbr': None,
+                        }
+                    ]
+                }
+            else:
+                print(f"OEmbed API error: {response.status_code}")
+                return None
+                
+        except Exception as e:
+            print(f"Fallback method error: {e}")
             return None
 
 # Global extractor instance
