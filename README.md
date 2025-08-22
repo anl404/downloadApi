@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # YouTube Video Info API
 
 YouTube video ID'si alıp video bilgilerini ve indirme linklerini döndüren Flask API'si. Mobil uygulamalar için backend servisi.
@@ -353,3 +354,6 @@ Bu proje eğitim amaçlıdır. YouTube'un kullanım şartlarına uygun kullanın
 3. Commit yapın (`git commit -m 'Add amazing feature'`)
 4. Push yapın (`git push origin feature/amazing-feature`)
 5. Pull Request oluşturun
+=======
+# downloadApi
+>>>>>>> 9f82b4cd17e4e277b8a2004913bf3aa851e2963c
