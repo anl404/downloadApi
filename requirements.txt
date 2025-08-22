@@ -1,0 +1,5 @@
+yt-dlp
+requests
+urllib3
+flask
+flask-cors
