@@ -62,7 +62,6 @@ class YouTubeInfoExtractor:
                     'Accept-Language': 'en-us,en;q=0.5',
                     'Sec-Fetch-Mode': 'navigate',
                 },
-                'cookiefile': 'cookies.txt',
                 'extractor_args': {
                     'youtube': {
                         'skip': ['dash', 'live'],
@@ -103,7 +102,6 @@ class YouTubeInfoExtractor:
                     'Accept-Language': 'en-us,en;q=0.5',
                     'Sec-Fetch-Mode': 'navigate',
                 },
-                'cookiefile': 'cookies.txt',
                 'extractor_args': {
                     'youtube': {
                         'skip': ['dash', 'live'],
